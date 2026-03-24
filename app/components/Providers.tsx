@@ -1,23 +1,9 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { WagmiProvider, createConfig, http } from "wagmi";
-import { base } from "wagmi/chains";
+import { base } from 'wagmi/chains';
+import { OnchainKitProvider } from '@coinbase/onchainkit';
 
-// Instâncias fora do componente para não recriar desnecessariamente no build
-const queryClient = new QueryClient();
-
-// Configuração Wagmi básica para o browser
-const wagmiConfig = createConfig({
-  chains: [base],
-  transports: {
-    [base.id]: http(),
-  },
-  ssr: true, // Mantém compatibilidade com o SSR do App Router
-});
-
-// Contexto simplificado (sem Farcaster por enquanto)
 interface AppContextValue {
   isMounted: boolean;
 }
@@ -32,13 +18,24 @@ export function Providers({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <AppContext.Provider value={{ isMounted }}>
-          {children}
-        </AppContext.Provider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <OnchainKitProvider
+      apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
+      chain={base}
+      config={{
+        appearance: {
+          name: 'NEO Wallet Roast',
+          mode: 'dark',
+        },
+        wallet: {
+          display: 'modal',
+          preference: 'all',
+        },
+      }}
+    >
+      <AppContext.Provider value={{ isMounted }}>
+        {children}
+      </AppContext.Provider>
+    </OnchainKitProvider>
   );
 }
 

@@ -1,64 +1,144 @@
-.PHONY: help dev build start lint clean install audit commit test-roast setup analyze
+.PHONY: help dev build start lint type-check clean install audit commit test-roast setup analyze deploy deploy-prod env-pull logs
 
-# Cores
-CYAN := \033[0;36m
-GREEN := \033[0;32m
-RED := \033[0;31m
-YELLOW := \033[0;33m
+# Colors
+CYAN    := \033[0;36m
+GREEN   := \033[0;32m
+RED     := \033[0;31m
+YELLOW  := \033[0;33m
 MAGENTA := \033[0;35m
-NC := \033[0m
+BOLD    := \033[1m
+NC      := \033[0m
 
-# Metadata
 APP_NAME := neo-wallet-roast
 
 help:
-	@echo "$(MAGENTA)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(NC)"
-	@echo "$(MAGENTA)  💀 NEO Wallet Roast - Console de Engenharia$(NC)"
-	@echo "$(MAGENTA)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(NC)"
-	@echo "$(CYAN)Available Commands:$(NC)"
-	@echo "  $(GREEN)make setup$(NC)     - Inicializa tudo (.env + deps)"
-	@echo "  $(GREEN)make dev$(NC)       - Inicia desenvolvimento"
-	@echo "  $(GREEN)make build$(NC)     - Build de produção"
-	@echo "  $(GREEN)make install$(NC)   - Instala dependências (pnpm)"
-	@echo "  $(GREEN)make audit$(NC)     - Security Check"
+	@echo "$(MAGENTA)$(BOLD)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(NC)"
+	@echo "$(MAGENTA)$(BOLD)  💀 NEO Wallet Roast — Dev Console$(NC)"
+	@echo "$(MAGENTA)$(BOLD)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(NC)"
+	@echo ""
+	@echo "$(CYAN)$(BOLD)Setup$(NC)"
+	@echo "  $(GREEN)make setup$(NC)        Inicializa .env.local + instala deps"
+	@echo "  $(GREEN)make install$(NC)      Instala dependências (pnpm)"
+	@echo "  $(GREEN)make env-pull$(NC)     Sincroniza vars do Vercel → .env.local"
+	@echo ""
+	@echo "$(CYAN)$(BOLD)Desenvolvimento$(NC)"
+	@echo "  $(GREEN)make dev$(NC)          Inicia servidor local (localhost:3000)"
+	@echo "  $(GREEN)make test-roast$(NC)   Testa endpoint /api/roast via curl"
+	@echo ""
+	@echo "$(CYAN)$(BOLD)Qualidade$(NC)"
+	@echo "  $(GREEN)make lint$(NC)         ESLint"
+	@echo "  $(GREEN)make type-check$(NC)   TypeScript sem emitir arquivos"
+	@echo "  $(GREEN)make audit$(NC)        Auditoria de segurança de deps"
+	@echo ""
+	@echo "$(CYAN)$(BOLD)Build$(NC)"
+	@echo "  $(GREEN)make build$(NC)        Build de produção"
+	@echo "  $(GREEN)make start$(NC)        Inicia servidor de produção local"
+	@echo "  $(GREEN)make analyze$(NC)      Bundle size analysis"
+	@echo ""
+	@echo "$(CYAN)$(BOLD)Deploy$(NC)"
+	@echo "  $(GREEN)make deploy$(NC)       Deploy preview no Vercel"
+	@echo "  $(GREEN)make deploy-prod$(NC)  Deploy em produção no Vercel"
+	@echo "  $(GREEN)make logs$(NC)         Logs do último deploy"
+	@echo ""
+	@echo "$(CYAN)$(BOLD)Git$(NC)"
+	@echo "  $(GREEN)make commit$(NC)       Lint + build + commit interativo"
+	@echo ""
+	@echo "$(CYAN)$(BOLD)Manutenção$(NC)"
+	@echo "  $(GREEN)make clean$(NC)        Remove .next e node_modules"
+	@echo ""
+
+# ── Setup ────────────────────────────────────────────────────
 
 install:
-	@echo "$(CYAN)Garantindo dependências com pnpm...$(NC)"
+	@echo "$(CYAN)Instalando dependências...$(NC)"
 	pnpm install
 
 setup:
-	@if [ ! -f .env ]; then cp .env.example .env; fi
+	@echo "$(CYAN)Inicializando projeto...$(NC)"
+	@if [ ! -f .env.local ]; then \
+		cp .env.example .env.local; \
+		echo "$(YELLOW).env.local criado — preencha as chaves antes de rodar$(NC)"; \
+	else \
+		echo "$(GREEN).env.local já existe, pulando$(NC)"; \
+	fi
 	pnpm install
+	@echo "$(GREEN)Pronto! Rode: make dev$(NC)"
+
+env-pull:
+	@echo "$(CYAN)Sincronizando vars do Vercel...$(NC)"
+	vercel env pull .env.local
+
+# ── Desenvolvimento ───────────────────────────────────────────
 
 dev:
 	pnpm dev
 
-build:
-	pnpm build
+test-roast:
+	@echo "$(CYAN)Testando /api/roast (demo mode)...$(NC)"
+	@curl -sf -X POST http://localhost:3000/api/roast \
+		-H "Content-Type: application/json" \
+		-d '{"address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045", "isDemo": true}' \
+		| jq . \
+		|| echo "$(RED)Servidor não está rodando. Rode: make dev$(NC)"
+
+# ── Qualidade ────────────────────────────────────────────────
 
 lint:
 	pnpm lint
 
+type-check:
+	@echo "$(CYAN)Checando tipos TypeScript...$(NC)"
+	pnpm tsc --noEmit
+
 audit:
+	@echo "$(CYAN)Auditoria de segurança...$(NC)"
 	pnpm audit
 
-clean:
-	@echo "$(YELLOW)Limpando o rastro...$(NC)"
-	rm -rf .next node_modules pnpm-lock.yaml
+# ── Build ────────────────────────────────────────────────────
+
+build:
+	pnpm build
+
+start:
+	pnpm start
+
+analyze:
+	@echo "$(CYAN)Analisando bundle...$(NC)"
+	ANALYZE=true pnpm build
+
+# ── Deploy ───────────────────────────────────────────────────
+
+deploy:
+	@echo "$(CYAN)Deploy preview...$(NC)"
+	vercel
+
+deploy-prod:
+	@echo "$(RED)$(BOLD)Deploy em PRODUÇÃO. Confirme com [Enter] ou cancele com Ctrl+C$(NC)"
+	@read _confirm
+	vercel --prod
+
+logs:
+	vercel logs $$(vercel ls --json 2>/dev/null | jq -r '.[0].url' 2>/dev/null || echo "$(APP_NAME)")
+
+# ── Git ──────────────────────────────────────────────────────
 
 commit:
-	@echo "$(MAGENTA)Iniciando Fluxo Seguro...$(NC)"
-	pnpm audit || (echo "$(RED)Falha no Audit!$(NC)" && exit 1)
-	pnpm build || (echo "$(RED)Falha no Build!$(NC)" && exit 1)
+	@echo "$(MAGENTA)$(BOLD)Fluxo de commit seguro$(NC)"
+	@pnpm lint || (echo "$(RED)Lint falhou$(NC)" && exit 1)
+	@pnpm build || (echo "$(RED)Build falhou$(NC)" && exit 1)
+	@echo ""
 	@git status
-	@echo "$(CYAN)Mensagem do commit: $(NC)"
+	@echo ""
+	@echo "$(CYAN)Mensagem do commit:$(NC)"
 	@read msg; \
-	git add .; \
+	git add -p; \
 	git commit -m "$$msg"; \
-	current_branch=$$(git rev-parse --abbrev-ref HEAD); \
-	git push origin $$current_branch
+	branch=$$(git rev-parse --abbrev-ref HEAD); \
+	git push origin $$branch
 
-test-roast:
-	@curl -s -X POST http://localhost:3000/api/roast \
-		-H "Content-Type: application/json" \
-		-d '{"address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045", "isDemo": true}' | jq .
+# ── Manutenção ───────────────────────────────────────────────
+
+clean:
+	@echo "$(YELLOW)Limpando artefatos...$(NC)"
+	rm -rf .next node_modules pnpm-lock.yaml
+	@echo "$(GREEN)Limpo. Rode: make install$(NC)"

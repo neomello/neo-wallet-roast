@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import '@coinbase/onchainkit/styles.css';
+@config "../tailwind.config.ts";
 
 :root {
   --background: #000000;
@@ -18,38 +18,36 @@ body {
 }
 
 .flame-bg {
-    background: linear-gradient(180deg, rgba(255, 49, 49, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
+  background: linear-gradient(180deg, rgba(255, 49, 49, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
 }
 
 .card-fire {
-    border: 1px solid rgba(255, 49, 49, 0.2);
-    background: rgba(10, 2, 2, 0.6);
-    backdrop-filter: blur(12px);
-    border-radius: 12px;
+  border: 1px solid rgba(255, 49, 49, 0.2);
+  background: rgba(10, 2, 2, 0.6);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
 }
 
 .card-fire:hover {
-    border: 1px solid rgba(255, 49, 49, 0.6);
-    box-shadow: 0 0 15px rgba(255, 49, 49, 0.3);
+  border: 1px solid rgba(255, 49, 49, 0.6);
+  box-shadow: 0 0 15px rgba(255, 49, 49, 0.3);
 }
 
-/* Custom transitions and other effects */
 .transition-fire {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Specific pulse for fire colors */
 @keyframes firePulse {
-    0%, 100% {
-        box-shadow: 0 0 20px rgba(255, 49, 49, 0.3);
-    }
-    50% {
-        box-shadow: 0 0 40px rgba(255, 49, 49, 0.6);
-    }
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 49, 49, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(255, 49, 49, 0.6);
+  }
 }
 
 .animate-fire-pulse {
-    animation: firePulse 2s ease-in-out infinite;
+  animation: firePulse 2s ease-in-out infinite;
 }
 
 @layer utilities {
