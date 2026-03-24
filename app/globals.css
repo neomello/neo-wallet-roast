@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import '@coinbase/onchainkit/styles.css';
 @config "../tailwind.config.ts";
 
 :root {

@@ -1,4 +1,4 @@
-import { Anthropic } from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { NextResponse } from "next/server";
 import { fetchWalletData } from "@/lib/fetchWalletData";
 
@@ -16,11 +16,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid Ethereum address" }, { status: 400 });
     }
 
-    if (!process.env.ANTHROPIC_API_KEY) {
+    if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json({ error: "Service temporarily unavailable" }, { status: 503 });
     }
 
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const walletData = await fetchWalletData(address, isDemo);
 
     const prompt = `You are an expert roast master. You specialize in roasting crypto wallets on behalf of 'NEO Wallet Roast'.
@@ -47,26 +47,22 @@ export async function POST(req: Request) {
 
     The score must be a number (integer), not a string.`;
 
-    const message = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20241022",
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
       max_tokens: 1024,
+      response_format: { type: "json_object" },
       messages: [{ role: "user", content: prompt }],
     });
 
-    const textRes = (message.content[0] as { type: string; text: string }).text;
-    const jsonMatch = textRes.match(/\{[\s\S]*\}/);
+    const textRes = completion.choices[0].message.content ?? "{}";
 
-    if (jsonMatch) {
-      try {
-        const parsed = JSON.parse(jsonMatch[0]);
-        parsed.score = Number(parsed.score) || 0;
-        return NextResponse.json(parsed);
-      } catch {
-        // fall through to raw text
-      }
+    try {
+      const parsed = JSON.parse(textRes);
+      parsed.score = Number(parsed.score) || 0;
+      return NextResponse.json(parsed);
+    } catch {
+      return NextResponse.json({ roast: textRes, score: 0, labels: [] });
     }
-
-    return NextResponse.json({ roast: textRes, score: 0, labels: [] });
 
   } catch (error) {
     console.error("Roast error:", error);

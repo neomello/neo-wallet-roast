@@ -97,14 +97,14 @@ audit:
 # ── Build ────────────────────────────────────────────────────
 
 build:
-	pnpm build
+	env -u NODE_ENV pnpm build
 
 start:
 	pnpm start
 
 analyze:
 	@echo "$(CYAN)Analisando bundle...$(NC)"
-	ANALYZE=true pnpm build
+	env -u NODE_ENV ANALYZE=true pnpm build
 
 # ── Deploy ───────────────────────────────────────────────────
 
@@ -125,7 +125,7 @@ logs:
 commit:
 	@echo "$(MAGENTA)$(BOLD)Fluxo de commit seguro$(NC)"
 	@pnpm lint || (echo "$(RED)Lint falhou$(NC)" && exit 1)
-	@pnpm build || (echo "$(RED)Build falhou$(NC)" && exit 1)
+	@env -u NODE_ENV pnpm build || (echo "$(RED)Build falhou$(NC)" && exit 1)
 	@echo ""
 	@git status
 	@echo ""
