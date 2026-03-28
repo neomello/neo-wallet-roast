@@ -10,7 +10,6 @@ import {
   WalletDropdown,
   WalletDropdownDisconnect,
 } from "@coinbase/onchainkit/wallet";
-import { Avatar, Name } from "@coinbase/onchainkit/identity";
 import { getI18n, interpolate, normalizeLocale, type Locale } from "@/lib/i18n";
 
 type RoastData = {
@@ -176,8 +175,7 @@ export default function HomeClient() {
         <div className="flex flex-col items-center gap-3 mb-6">
           <Wallet>
             <ConnectWallet className="w-full bg-white text-black font-black py-4 px-8 rounded-xl flex items-center justify-center gap-2 hover:bg-fire-500 hover:text-white transition-fire uppercase tracking-widest">
-              <Avatar className="h-5 w-5" />
-              <Name />
+              {copy.connectWallet}
             </ConnectWallet>
             <WalletDropdown>
               <WalletDropdownDisconnect />

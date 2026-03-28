@@ -2,6 +2,7 @@
   "ui": {
     "tagline": "Deixe a IA julgar seus erros financeiros.",
     "language": "Idioma",
+    "connectWallet": "Conectar Carteira",
     "orEnterAddress": "ou cole qualquer carteira abaixo",
     "incinerate": "Incinerar",
     "demo": "Demo",

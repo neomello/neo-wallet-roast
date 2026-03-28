@@ -2,6 +2,7 @@
   "ui": {
     "tagline": "Let AI judge your financial mistakes.",
     "language": "Language",
+    "connectWallet": "Connect Wallet",
     "orEnterAddress": "or enter any address below",
     "incinerate": "Incinerate",
     "demo": "Demo",
