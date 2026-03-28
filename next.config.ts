@@ -15,11 +15,13 @@ const nextConfig: NextConfig = {
     };
     return config;
   },
-  experimental: {
-    turbo: {
-      resolveAlias: {
-        "@react-native-async-storage/async-storage": { browser: "./empty-module.js" },
-        "pino-pretty": { browser: "./empty-module.js" },
+  turbopack: {
+    resolveAlias: {
+      "@react-native-async-storage/async-storage": {
+        browser: "./empty-module.js",
+      },
+      "pino-pretty": {
+        browser: "./empty-module.js",
       },
     },
   },

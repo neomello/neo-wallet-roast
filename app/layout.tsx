@@ -9,15 +9,15 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://neo-wallet-roast.vercel.app"),
-  title: "NEO Wallet Roast | How bad is your crypto portfolio?",
+  title: "NEØ Wallet Roast | How bad is your crypto portfolio?",
   description:
-    "Get a brutal AI roast of your on-chain activity. From PEPE moonshots to 'utility' NFTs, Claude sees it all.",
+    "Get a brutal AI roast of your on-chain activity. From PEPE moonshots to utility NFTs, AI sees it all.",
   openGraph: {
     title: "NEO Wallet Roast",
     description:
       "Connect or paste your address for a brutal AI roast. Ready for the burn?",
     url: "https://neo-wallet-roast.vercel.app",
-    siteName: "NEO Wallet Roast",
+    siteName: "NEØ Wallet Roast",
     images: [
       {
         url: "/opengraph-image",
@@ -25,12 +25,12 @@ export const metadata: Metadata = {
         height: 630,
       },
     ],
-    locale: "en_US",
+    locale: "pt_BR",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "NEO Wallet Roast",
+    title: "NEØ Wallet Roast",
     description:
       "Get a brutal AI roast of your on-chain activity. Ready for the burn?",
     images: ["/twitter-image"],
@@ -44,7 +44,7 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="pt-BR" className="dark">
       <body
         className={`${inter.className} bg-black text-white min-h-screen antialiased selection:bg-fire-500 selection:text-white`}
       >

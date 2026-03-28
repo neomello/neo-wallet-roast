@@ -1,0 +1,48 @@
+{
+  "ui": {
+    "tagline": "Let AI judge your financial mistakes.",
+    "language": "Language",
+    "orEnterAddress": "or enter any address below",
+    "incinerate": "Incinerate",
+    "demo": "Demo",
+    "incineratingWallet": "Incinerating your wallet...",
+    "judgementRendered": "Judgement Rendered",
+    "degenScore": "Degen Score",
+    "tier": "Tier",
+    "tierInsane": "Insane",
+    "tierDecent": "Decent",
+    "tierBoring": "Boring",
+    "shareTheBurn": "Share The Burn",
+    "contract": "Contract",
+    "twitter": "Twitter",
+    "warpcast": "Warpcast",
+    "poweredBy": "Powered by OpenAI & Base",
+    "genericError": "Something went wrong. Try again.",
+    "connectionFailed": "Connection failed. Try again.",
+    "shareTextTemplate": "I just got roasted by #NEOWalletRoast! My Degen Score: {{score}}/100\\n\\n\\\"{{excerpt}}...\\\""
+  },
+  "api": {
+    "errors": {
+      "noAddressProvided": "No address provided.",
+      "invalidEthereumAddress": "Invalid Ethereum address.",
+      "missingOpenAIKey": "OPENAI_API_KEY is not configured on the server.",
+      "invalidOpenAIKey": "Invalid OPENAI_API_KEY configured on the server.",
+      "modelUnavailable": "Roast model is temporarily unavailable. Try again later.",
+      "requestFailed": "Unable to process wallet roast request. Try again later."
+    },
+    "prompt": {
+      "languageInstruction": "Write the roast in English."
+    },
+    "fallback": {
+      "labels": {
+        "hyperactive": "Hyperactive",
+        "casual": "Casual",
+        "altcoinCollector": "Altcoin Collector",
+        "concentrated": "Concentrated",
+        "jpegWarrior": "JPEG Warrior",
+        "noJpegExposure": "No JPEG Exposure"
+      },
+      "roastTemplate": "Local roast mode: {{address}} has {{txCount}} txs, {{tokenCount}} token positions, {{nftCount}} NFTs, and {{balance}} ETH. This wallet is not bankrupt, but it is clearly negotiating with chaos. Keep moving, but maybe stop adopting every shiny ticker before reading what it does."
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "ui": {
+    "tagline": "Deixe a IA julgar seus erros financeiros.",
+    "language": "Idioma",
+    "orEnterAddress": "ou cole qualquer carteira abaixo",
+    "incinerate": "Incinerar",
+    "demo": "Demo",
+    "incineratingWallet": "Incinerando sua carteira...",
+    "judgementRendered": "Veredito Emitido",
+    "degenScore": "Pontuacao Degen",
+    "tier": "Nivel",
+    "tierInsane": "Insano",
+    "tierDecent": "Decente",
+    "tierBoring": "Sem Graca",
+    "shareTheBurn": "Compartilhar Roast",
+    "contract": "Contrato",
+    "twitter": "Twitter",
+    "warpcast": "Warpcast",
+    "poweredBy": "Powered by OpenAI & Base",
+    "genericError": "Algo deu errado. Tente novamente.",
+    "connectionFailed": "Falha de conexao. Tente novamente.",
+    "shareTextTemplate": "Acabei de ser roastado no #NEOWalletRoast! Minha Pontuacao Degen: {{score}}/100\\n\\n\\\"{{excerpt}}...\\\""
+  },
+  "api": {
+    "errors": {
+      "noAddressProvided": "Nenhum endereco informado.",
+      "invalidEthereumAddress": "Endereco Ethereum invalido.",
+      "missingOpenAIKey": "OPENAI_API_KEY nao configurada no servidor.",
+      "invalidOpenAIKey": "OPENAI_API_KEY invalida no servidor.",
+      "modelUnavailable": "Modelo de roast temporariamente indisponivel. Tente novamente.",
+      "requestFailed": "Nao foi possivel processar o roast da carteira. Tente novamente."
+    },
+    "prompt": {
+      "languageInstruction": "Write the roast in Brazilian Portuguese (pt-BR)."
+    },
+    "fallback": {
+      "labels": {
+        "hyperactive": "Hiperativo",
+        "casual": "Casual",
+        "altcoinCollector": "Colecionador de Altcoins",
+        "concentrated": "Concentrado",
+        "jpegWarrior": "Guerreiro de JPEG",
+        "noJpegExposure": "Sem Exposicao a JPEG"
+      },
+      "roastTemplate": "Modo local de roast: {{address}} tem {{txCount}} transacoes, {{tokenCount}} posicoes em tokens, {{nftCount}} NFTs e {{balance}} ETH. Essa carteira nao esta quebrada, mas esta claramente negociando com o caos. Continue no jogo, mas talvez pare de adotar todo ticker brilhante antes de entender para que serve."
+    }
+  }
+}

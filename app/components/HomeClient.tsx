@@ -1,16 +1,17 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { Flame, Share2, Search, RefreshCw, Trophy, Skull } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAccount } from 'wagmi';
+import { useState, useEffect, useCallback } from "react";
+import { Flame, Share2, Search, RefreshCw, Trophy, Skull } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAccount } from "wagmi";
 import {
   Wallet,
   ConnectWallet,
   WalletDropdown,
   WalletDropdownDisconnect,
-} from '@coinbase/onchainkit/wallet';
-import { Avatar, Name } from '@coinbase/onchainkit/identity';
+} from "@coinbase/onchainkit/wallet";
+import { Avatar, Name } from "@coinbase/onchainkit/identity";
+import { getI18n, interpolate, normalizeLocale, type Locale } from "@/lib/i18n";
 
 type RoastData = {
   roast: string;
@@ -18,40 +19,66 @@ type RoastData = {
   labels?: string[];
 };
 
+const LOCALE_STORAGE_KEY = "neo-wallet-roast-locale";
+
 export default function HomeClient() {
-  const [address, setAddress] = useState('');
+  const [locale, setLocale] = useState<Locale>("en");
+  const [address, setAddress] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [roastData, setRoastData] = useState<RoastData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const copy = getI18n(locale).ui;
 
   const { address: connectedAddress, isConnected } = useAccount();
 
-  const triggerRoast = useCallback(async (targetAddress: string, isDemo = false) => {
-    setIsLoading(true);
-    setRoastData(null);
-    setError(null);
+  useEffect(() => {
+    const storedLocale = localStorage.getItem(LOCALE_STORAGE_KEY);
+    if (storedLocale) {
+      setLocale(normalizeLocale(storedLocale));
+      return;
+    }
 
-    try {
-      const response = await fetch('/api/roast', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          address: targetAddress || '0xd8da6bf26964af9d7eed9e03e53415d37aa96045',
-          isDemo,
-        }),
-      });
-      const data = await response.json();
-      if (!response.ok || data.error) {
-        setError(data.error || 'Something went wrong. Try again.');
-      } else {
-        setRoastData(data);
-      }
-    } catch {
-      setError('Connection failed. Try again.');
-    } finally {
-      setIsLoading(false);
+    if (navigator.language.toLowerCase().startsWith("pt")) {
+      setLocale("pt-BR");
     }
   }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = locale;
+    localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+  }, [locale]);
+
+  const triggerRoast = useCallback(
+    async (targetAddress: string, isDemo = false) => {
+      setIsLoading(true);
+      setRoastData(null);
+      setError(null);
+
+      try {
+        const response = await fetch("/api/roast", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            address:
+              targetAddress || "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+            isDemo,
+            locale,
+          }),
+        });
+        const data = await response.json();
+        if (!response.ok || data.error) {
+          setError(data.error || copy.genericError);
+        } else {
+          setRoastData(data);
+        }
+      } catch {
+        setError(copy.connectionFailed);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [copy.connectionFailed, copy.genericError, locale],
+  );
 
   // Auto-roast when wallet connects
   useEffect(() => {
@@ -64,7 +91,7 @@ export default function HomeClient() {
   // Clear on disconnect
   useEffect(() => {
     if (!isConnected) {
-      setAddress('');
+      setAddress("");
       setRoastData(null);
       setError(null);
     }
@@ -78,9 +105,12 @@ export default function HomeClient() {
 
   const shareRoast = () => {
     if (!roastData) return;
-    const text = `I just got roasted by #NEOWalletRoast! 💀 My Degen Score: ${roastData.score}/100\n\n"${roastData.roast.substring(0, 100)}..."`;
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent('https://' + window.location.host)}`;
-    window.open(url, '_blank');
+    const text = interpolate(copy.shareTextTemplate, {
+      score: roastData.score,
+      excerpt: roastData.roast.substring(0, 100),
+    });
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent("https://" + window.location.host)}`;
+    window.open(url, "_blank");
   };
 
   return (
@@ -94,14 +124,44 @@ export default function HomeClient() {
         transition={{ duration: 0.8 }}
         className="text-center mb-12 space-y-4 pt-10"
       >
+        <div className="flex items-center justify-center gap-2 mb-3">
+          <span className="text-zinc-500 text-xs uppercase tracking-widest font-bold">
+            {copy.language}
+          </span>
+          <button
+            type="button"
+            onClick={() => setLocale("en")}
+            className={`px-3 py-1 rounded-md text-xs font-black tracking-wider transition-fire border ${
+              locale === "en"
+                ? "bg-fire-500/30 text-fire-200 border-fire-500/60"
+                : "bg-zinc-900/60 text-zinc-400 border-zinc-700"
+            }`}
+          >
+            EN
+          </button>
+          <button
+            type="button"
+            onClick={() => setLocale("pt-BR")}
+            className={`px-3 py-1 rounded-md text-xs font-black tracking-wider transition-fire border ${
+              locale === "pt-BR"
+                ? "bg-fire-500/30 text-fire-200 border-fire-500/60"
+                : "bg-zinc-900/60 text-zinc-400 border-zinc-700"
+            }`}
+          >
+            PT-BR
+          </button>
+        </div>
         <div className="inline-block p-4 bg-fire-500/10 rounded-full mb-2 border border-fire-500/20 animate-fire-pulse">
-          <Flame className="w-12 h-12 text-fire-500 fill-fire-500" strokeWidth={2.5} />
+          <Flame
+            className="w-12 h-12 text-fire-500 fill-fire-500"
+            strokeWidth={2.5}
+          />
         </div>
         <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase fire-glow italic text-white">
           NEO Wallet Roast
         </h1>
         <p className="text-fire-300 text-lg md:text-xl max-w-md mx-auto font-medium opacity-80">
-          Let Claude judge your financial mistakes.
+          {copy.tagline}
         </p>
       </motion.div>
 
@@ -125,14 +185,17 @@ export default function HomeClient() {
           </Wallet>
           {!isConnected && (
             <p className="text-zinc-600 text-xs font-bold uppercase tracking-widest">
-              — or enter any address below —
+              - {copy.orEnterAddress} -
             </p>
           )}
         </div>
 
         {/* Manual input */}
         {!isConnected && (
-          <form onSubmit={(e) => handleManualRoast(e)} className="flex flex-col gap-4">
+          <form
+            onSubmit={(e) => handleManualRoast(e)}
+            className="flex flex-col gap-4"
+          >
             <div className="relative group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-fire-400 group-focus-within:text-fire-500 transition-fire w-5 h-5" />
               <input
@@ -149,7 +212,11 @@ export default function HomeClient() {
                 type="submit"
                 className="flex-1 bg-white text-black font-black py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-fire-500 hover:text-white transition-fire uppercase tracking-widest disabled:opacity-50"
               >
-                {isLoading ? <RefreshCw className="w-5 h-5 animate-spin" /> : 'Incinerate'}
+                {isLoading ? (
+                  <RefreshCw className="w-5 h-5 animate-spin" />
+                ) : (
+                  copy.incinerate
+                )}
               </button>
               <button
                 disabled={isLoading}
@@ -157,7 +224,7 @@ export default function HomeClient() {
                 onClick={() => handleManualRoast(undefined, true)}
                 className="flex-none bg-zinc-900 hover:bg-zinc-800 text-zinc-400 font-bold py-4 px-6 rounded-xl transition-fire uppercase tracking-widest border border-zinc-800 text-sm"
               >
-                Demo
+                {copy.demo}
               </button>
             </div>
           </form>
@@ -167,7 +234,9 @@ export default function HomeClient() {
         {isConnected && isLoading && (
           <div className="flex items-center justify-center gap-3 py-4 text-fire-400">
             <RefreshCw className="w-5 h-5 animate-spin" />
-            <span className="font-bold uppercase tracking-widest text-sm">Incinerating your wallet...</span>
+            <span className="font-bold uppercase tracking-widest text-sm">
+              {copy.incineratingWallet}
+            </span>
           </div>
         )}
       </motion.div>
@@ -203,7 +272,7 @@ export default function HomeClient() {
               <div className="flex items-center gap-3 mb-6">
                 <Trophy className="w-8 h-8 text-fire-400" />
                 <span className="text-xl font-black uppercase text-fire-400 tracking-tighter">
-                  JUDGEMENT RENDERED
+                  {copy.judgementRendered}
                 </span>
               </div>
 
@@ -224,14 +293,24 @@ export default function HomeClient() {
 
               <div className="grid grid-cols-2 gap-4 border-t border-fire-900/50 pt-8 mt-4">
                 <div className="text-center">
-                  <div className="text-4xl font-black text-fire-500">{roastData.score}</div>
-                  <div className="text-xs uppercase text-zinc-500 font-bold tracking-widest">DEGEN SCORE</div>
+                  <div className="text-4xl font-black text-fire-500">
+                    {roastData.score}
+                  </div>
+                  <div className="text-xs uppercase text-zinc-500 font-bold tracking-widest">
+                    {copy.degenScore}
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="text-4xl font-black text-white">
-                    {roastData.score > 80 ? 'INSANE' : roastData.score > 50 ? 'DECENT' : 'BORING'}
+                    {roastData.score > 80
+                      ? copy.tierInsane
+                      : roastData.score > 50
+                        ? copy.tierDecent
+                        : copy.tierBoring}
                   </div>
-                  <div className="text-xs uppercase text-zinc-500 font-bold tracking-widest">TIER</div>
+                  <div className="text-xs uppercase text-zinc-500 font-bold tracking-widest">
+                    {copy.tier}
+                  </div>
                 </div>
               </div>
             </div>
@@ -241,10 +320,13 @@ export default function HomeClient() {
                 onClick={shareRoast}
                 className="flex-1 bg-fire-600 hover:bg-fire-500 text-white font-black py-5 rounded-2xl flex items-center justify-center gap-3 transition-fire uppercase tracking-widest shadow-2xl shadow-fire-900/40"
               >
-                <Share2 className="w-6 h-6" /> SHARE THE BURN
+                <Share2 className="w-6 h-6" /> {copy.shareTheBurn}
               </button>
               <button
-                onClick={() => { setRoastData(null); setError(null); }}
+                onClick={() => {
+                  setRoastData(null);
+                  setError(null);
+                }}
                 className="bg-zinc-900 hover:bg-zinc-800 p-5 rounded-2xl border border-zinc-800 transition-fire"
               >
                 <RefreshCw className="w-6 h-6" />
@@ -256,11 +338,28 @@ export default function HomeClient() {
 
       <footer className="mt-auto pt-20 pb-10 text-zinc-700 flex flex-col items-center gap-4">
         <div className="flex items-center gap-6">
-          <a href="#" className="hover:text-fire-500 transition-fire font-bold tracking-widest uppercase text-xs">Contract</a>
-          <a href="#" className="hover:text-fire-500 transition-fire font-bold tracking-widest uppercase text-xs">Twitter</a>
-          <a href="#" className="hover:text-fire-500 transition-fire font-bold tracking-widest uppercase text-xs">Warpcast</a>
+          <a
+            href="#"
+            className="hover:text-fire-500 transition-fire font-bold tracking-widest uppercase text-xs"
+          >
+            {copy.contract}
+          </a>
+          <a
+            href="#"
+            className="hover:text-fire-500 transition-fire font-bold tracking-widest uppercase text-xs"
+          >
+            {copy.twitter}
+          </a>
+          <a
+            href="#"
+            className="hover:text-fire-500 transition-fire font-bold tracking-widest uppercase text-xs"
+          >
+            {copy.warpcast}
+          </a>
         </div>
-        <p className="text-[10px] opacity-40 uppercase tracking-[0.3em] font-black">Powered by Anthropic & Base</p>
+        <p className="text-[10px] opacity-40 uppercase tracking-[0.3em] font-black">
+          {copy.poweredBy}
+        </p>
       </footer>
     </main>
   );

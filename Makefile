@@ -1,4 +1,4 @@
-.PHONY: help dev build start lint type-check clean install audit commit test-roast setup analyze deploy deploy-prod env-pull logs
+.PHONY: help dev build start lint type-check preflight clean install audit commit test-roast setup analyze deploy deploy-prod env-pull logs
 
 # Colors
 CYAN    := \033[0;36m
@@ -28,6 +28,7 @@ help:
 	@echo "$(CYAN)$(BOLD)Qualidade$(NC)"
 	@echo "  $(GREEN)make lint$(NC)         ESLint"
 	@echo "  $(GREEN)make type-check$(NC)   TypeScript sem emitir arquivos"
+	@echo "  $(GREEN)make preflight$(NC)    Lint + type-check + build local"
 	@echo "  $(GREEN)make audit$(NC)        Auditoria de segurança de deps"
 	@echo ""
 	@echo "$(CYAN)$(BOLD)Build$(NC)"
@@ -88,7 +89,13 @@ lint:
 
 type-check:
 	@echo "$(CYAN)Checando tipos TypeScript...$(NC)"
-	pnpm tsc --noEmit
+	pnpm exec tsc --noEmit --incremental false
+
+preflight:
+	@echo "$(CYAN)Rodando preflight (lint + type-check + build)...$(NC)"
+	@$(MAKE) lint
+	@$(MAKE) type-check
+	@$(MAKE) build
 
 audit:
 	@echo "$(CYAN)Auditoria de segurança...$(NC)"
@@ -108,11 +115,11 @@ analyze:
 
 # ── Deploy ───────────────────────────────────────────────────
 
-deploy:
+deploy: preflight
 	@echo "$(CYAN)Deploy preview...$(NC)"
 	vercel
 
-deploy-prod:
+deploy-prod: preflight
 	@echo "$(RED)$(BOLD)Deploy em PRODUÇÃO. Confirme com [Enter] ou cancele com Ctrl+C$(NC)"
 	@read _confirm
 	vercel --prod
@@ -140,5 +147,5 @@ commit:
 
 clean:
 	@echo "$(YELLOW)Limpando artefatos...$(NC)"
-	rm -rf .next node_modules pnpm-lock.yaml
+	rm -rf .next node_modules
 	@echo "$(GREEN)Limpo. Rode: make install$(NC)"
